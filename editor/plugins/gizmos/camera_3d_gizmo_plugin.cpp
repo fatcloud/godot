@@ -232,22 +232,28 @@ void Camera3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 		} break;
 
 		case Camera3D::PROJECTION_FRUSTUM: {
-			float hsize = camera->get_size() / 2.0;
+			float view_width = camera->get_size() / 2.0;
+			float view_distance = camera->get_near();
 
-			Vector3 side = Vector3(hsize, 0, -camera->get_near()).normalized();
+			// find the midpoint in positive x and negtive x side (without frustum offset)
+			Vector3 side = Vector3(view_width, 0, -view_distance).normalized();
+			float normalized_ratio = side.x / view_width;
 			side.x *= size_factor.x;
 			Vector3 nside = Vector3(-side.x, side.y, side.z);
-			Vector3 up = Vector3(0, hsize * size_factor.y, 0);
-			Vector3 offset = Vector3(camera->get_frustum_offset().x, camera->get_frustum_offset().y, 0.0);
+
+			Vector3 up = Vector3(0, side.x * size_factor.y, 0);
+
+			// offset the side vectors
+			Vector3 offset = Vector3(camera->get_frustum_offset().x, camera->get_frustum_offset().y, 0.0) * normalized_ratio;
 
 			ADD_TRIANGLE(Vector3(), side + up + offset, side - up + offset);
 			ADD_TRIANGLE(Vector3(), nside + up + offset, nside - up + offset);
 			ADD_TRIANGLE(Vector3(), side + up + offset, nside + up + offset);
 			ADD_TRIANGLE(Vector3(), side - up + offset, nside - up + offset);
 
-			side.x = MIN(side.x, hsize * 0.25);
+			side.x = side.x / 4.0;
 			nside.x = -side.x;
-			Vector3 tup(0, up.y + hsize / 2, side.z);
+			Vector3 tup(0, up.y * 1.5, side.z);
 			ADD_TRIANGLE(tup + offset, side + up + offset, nside + up + offset);
 		} break;
 	}
