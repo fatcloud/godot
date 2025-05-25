@@ -233,6 +233,9 @@ void Camera3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 
 		case Camera3D::PROJECTION_FRUSTUM: {
 			float view_width = camera->get_size() / 2.0;
+			if (camera->get_keep_aspect_mode() == Camera3D::KEEP_HEIGHT)
+				view_width = view_width / size_factor.y;
+			
 			float view_distance = camera->get_near();
 
 			// find the midpoint in positive x and negtive x side (without frustum offset)
